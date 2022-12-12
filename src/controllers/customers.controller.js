@@ -1,14 +1,38 @@
 import { connectionDB } from "../database/db.js";
 
 
+export async function getCustomer(req, res) {
+    const { cpf } = req.query;
+
+    try {
+        const params = [];
+        let whereQuery = '';
+
+        if (cpf) {
+            params.push(`${cpf}%`)
+            whereQuery += `WHERE cpf ILIKE $${params.length}`
+        }
+
+        const customers = await connectionDB.query(`
+          SELECT * FROM customers
+          ${whereQuery}
+        `, params)
+
+        res.send(customers.rows)
+    } catch (error) {
+        console.log(error)
+        res.sendStatus(500)
+    }
+}
+
 export async function createCustomer(req, res) {
 
-    const { name, phone , cpf, birthday } = req.body;
+    const { name, phone, cpf, birthday } = req.body;
 
     try {
         const customerExist = await connectionDB.query('SELECT id FROM customers WHERE cpf = $1;', [cpf]);
-        if(customerExist.rowCount > 0) return res.sendStatus(409);
-        
+        if (customerExist.rowCount > 0) return res.sendStatus(409);
+
         await connectionDB.query(`
         INSERT INTO customers (name, phone, cpf, birthday) 
         VALUES ($1, $2, $3, $4);
