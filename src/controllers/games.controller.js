@@ -30,17 +30,22 @@ export async function getGames(req, res) {
     }
   }
 export async function createGame(req, res) {
-    const game = req.body;
+    const {name, image, stockTotal, categoryId, pricePerDay} = req.body;
     try {
-      const gameExist = await connectionDB.query('SELECT id FROM categories WHERE id = $1;', [game.categoryId]);
-      if (gameExist.rowCount === 0) {
+      const categoryExist = await connectionDB.query('SELECT id FROM categories WHERE id = $1;', [categoryId]);
+      if (categoryExist.rowCount === 0) {
         return res.sendStatus(400);
+      }
+
+      const gameExist = await connectionDB.query('SELECT id FROM games WHERE name=$1', [name]);
+      if (gameExist.rowCount > 0) {
+        return res.sendStatus(409);
       }
   
       await connectionDB.query(`
         INSERT INTO games(name, image, "stockTotal", "categoryId", "pricePerDay")
         VALUES ($1, $2, $3, $4, $5);
-      `, [game.name, game.image, Number(game.stockTotal), game.categoryId, Number(game.pricePerDay)]);
+      `, [name, image, Number(stockTotal), categoryId, Number(pricePerDay)]);
   
       res.sendStatus(201)
     } catch (error) {

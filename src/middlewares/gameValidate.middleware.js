@@ -10,6 +10,5 @@ export function validateGame(req, res, next) {
         return res.status(400).send( {message: errors});
     }
 
-    console.log("oi");
     next();
 }
