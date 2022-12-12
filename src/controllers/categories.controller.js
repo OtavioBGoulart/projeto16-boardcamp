@@ -6,7 +6,7 @@ export async function getCategories(req, res) {
       const categories = await connectionDB.query(`
         SELECT * FROM categories;
       `);
-      res.send(categories.rows)
+      res.send(categories.rows);
     } catch (error) {
       console.log(error)
       res.sendStatus(500)

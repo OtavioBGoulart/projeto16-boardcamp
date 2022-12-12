@@ -4,6 +4,9 @@ import { validateGame } from "../middlewares/gameValidate.middleware.js";
 
 const router = Router();
 
-router.get("/games", getGames);
-router.post("/games", validateGame, createGame)
+console.log("aaa")
 
+router.get("/games", getGames);
+router.post("/games", validateGame, createGame);
+
+export default router;
