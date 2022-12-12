@@ -33,14 +33,11 @@ export async function createGame(req, res) {
     const {name, image, stockTotal, categoryId, pricePerDay} = req.body;
     try {
       const categoryExist = await connectionDB.query('SELECT id FROM categories WHERE id = $1;', [categoryId]);
-      if (categoryExist.rowCount === 0) {
-        return res.sendStatus(400);
-      }
+        if (categoryExist.rowCount === 0) return res.sendStatus(400);
+      
 
       const gameExist = await connectionDB.query('SELECT id FROM games WHERE name=$1', [name]);
-      if (gameExist.rowCount > 0) {
-        return res.sendStatus(409);
-      }
+      if (gameExist.rowCount > 0) return res.sendStatus(409);
   
       await connectionDB.query(`
         INSERT INTO games(name, image, "stockTotal", "categoryId", "pricePerDay")
