@@ -25,6 +25,27 @@ export async function getCustomer(req, res) {
     }
 }
 
+export async function getCustomerById(req, res) {
+    const { id } = req.params;
+    console.log(id)
+
+    if (isNaN(parseInt(id))) return res.sendStatus(400);
+
+    try {
+        const customerExist = await connectionDB.query(`SELECT * FROM customers WHERE id = $1;`, [id])
+        if (customerExist.rowCount === 0) return res.sendStatus(400);
+
+        console.log(customerExist);
+        res.send(customerExist.rows[0])
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+      
+
+}
+
+
 export async function createCustomer(req, res) {
 
     const { name, phone, cpf, birthday } = req.body;
