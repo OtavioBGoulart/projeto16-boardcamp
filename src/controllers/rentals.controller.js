@@ -1,6 +1,81 @@
 import { connectionDB } from "../database/db.js";
 import dayjs from "dayjs";
 
+export async function getRentals(req, res) {
+  const { customerId, gameId } = req.query;
+
+  try {
+    const params = [];
+    const conditions = [];
+    let whereString = '';
+
+    if (customerId) {
+      params.push(customerId);
+      conditions.push(`rentals."customerId" = $${params.length}`)
+    }
+
+    if (gameId) {
+      params.push(gameId);
+      conditions.push(`rentals."gameId"=$${params.length}`)
+    }
+
+    if (params.length > 0) {
+      whereString += `WHERE ${conditions.join(" AND ")}`
+    }
+
+    const { rows } = await connectionDB.query({
+      text: `
+        SELECT 
+          rentals.*,
+          customers.id AS "customerId",
+          customers.name AS "customerName",
+          games.id AS "gameId",
+          games.name AS "gameName",
+          games."categoryId" AS "categoryId",
+          categories.name AS "categoryName"
+        FROM rentals
+          JOIN customers ON customers.id=rentals."customerId"
+          JOIN games ON games.id=rentals."gameId"
+          JOIN categories ON categories.id=games."categoryId"
+        ${whereString}
+      `,
+      //rowMode: "array"
+    }, params)
+
+    const rentalstoArray = rows.map(row => {
+      return {
+				id: row.id,
+				customerId: row.customerId,
+				gameId: row.gameId,
+				rentDate: row.rentDate,
+				daysRented: row.daysRented,
+				returnDate: row.returnDate,
+				returnDate: row.returnDate,
+				originalPrice: row.originalPrice,
+				delayFee: row.delayFee,
+				customer: {
+					id: row.customerId,
+					name: row.customerName,
+				},
+				game: {
+					id: row.gameId,
+					name: row.gameName,
+					categoryId: row.categoryId,
+					categoryName: row.categoryName,
+				},
+			}
+
+    })
+
+    console.log(rentalstoArray);
+
+    res.send(rentalstoArray);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+}
+
 export async function createRental(req, res) {
 
     const { customerId, gameId, daysRented } = req.body;
