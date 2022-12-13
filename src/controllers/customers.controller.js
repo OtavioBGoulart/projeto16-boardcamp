@@ -27,7 +27,8 @@ export async function getCustomer(req, res) {
 
 export async function getCustomerById(req, res) {
     const { id } = req.params;
-    console.log(id)
+    //console.log(id)
+
 
     if (isNaN(parseInt(id))) return res.sendStatus(400);
 
@@ -35,7 +36,7 @@ export async function getCustomerById(req, res) {
         const customerExist = await connectionDB.query(`SELECT * FROM customers WHERE id = $1;`, [id])
         if (customerExist.rowCount === 0) return res.sendStatus(400);
 
-        console.log(customerExist);
+        //console.log(customerExist);
         res.send(customerExist.rows[0])
     } catch (error) {
         console.log(error);
@@ -70,6 +71,9 @@ export async function updateCustomer(req, res) {
     const { id } = req.params;
     const { name, phone, cpf, birthday } = req.body;
 
+    //console.log("oi")
+
+
     if (isNaN(parseInt(id))) return res.sendStatus(400);
 
 
@@ -77,7 +81,7 @@ export async function updateCustomer(req, res) {
         const updateRefuse = await connectionDB.query('SELECT id FROM customers WHERE cpf = $1 AND id != $2;', [cpf, id]);
         if (updateRefuse.rowCount > 0) return res.sendStatus(409);
 
-        await db.query(`
+        await connectionDB.query(`
         UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 
         WHERE id = $5;
     `, [name, phone, cpf, birthday, id])
